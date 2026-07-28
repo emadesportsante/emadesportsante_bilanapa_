@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Activity, Timer, ShieldCheck, ShieldAlert, ShieldX, Play, Square, ChevronRight, Phone, Mail, MapPin, Video, Home, Stethoscope, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Analytics } from '@vercel/analytics/react';
 
 const NAVY = "#003952";
 const BLUE = "#0C7FB4";
@@ -863,6 +864,7 @@ export default function App() {
         </div>
         {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
       </div>
+      <Analytics />
     </div>
   );
 }
@@ -875,4 +877,3 @@ const inputStyle = {
   fontFamily: "inherit",
   outline: "none",
 };
-
