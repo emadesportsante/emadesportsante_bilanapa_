@@ -10,6 +10,7 @@ const LOGO_ICON = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJIAAACgCAYAAAD
 
 const STEPS = [
   "intro",
+  "age",
   "q1", "q2", "q3", "q4", "q5", "q6", "q7",
   "tug-intro", "tug-run", "tug-done",
   "uni-intro", "uni-run", "uni-done",
@@ -22,7 +23,7 @@ const STEPS = [
 
 function ProgressDots({ step }) {
   // only show progress across the "meaningful" phases
-  const phase = step.startsWith("q") ? 1
+  const phase = (step === "age" || step.startsWith("q")) ? 1
     : step.startsWith("tug") ? 2
     : step.startsWith("uni") ? 3
     : ["result", "zone", "offer"].includes(step) ? 4
@@ -155,6 +156,33 @@ function PrivacyModal({ onClose }) {
           <p><strong>Vos droits</strong><br />Vous pouvez à tout moment demander l'accès, la rectification ou la suppression de vos données en écrivant à emade.sportsante@gmail.com.</p>
           <p style={{ marginBottom: 0 }}><strong>À noter</strong><br />Cet outil est une auto-évaluation et ne constitue pas un dispositif médical ni un diagnostic.</p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AgeQuestion({ value, onChange, onNext }) {
+  const valid = value !== "" && Number(value) >= 18 && Number(value) <= 110;
+  return (
+    <div>
+      <h2 style={{ fontFamily: "Georgia, serif", fontSize: 22, color: NAVY, margin: "0 0 10px", lineHeight: 1.3 }}>
+        Quel est votre âge ?
+      </h2>
+      <p style={{ color: "#5C7A87", fontSize: 15, marginBottom: 24, lineHeight: 1.5 }}>
+        Ça nous permet d'adapter au mieux le suivi proposé.
+      </p>
+      <input
+        type="number"
+        inputMode="numeric"
+        placeholder="Ex : 72"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ ...inputStyle, fontSize: 22, textAlign: "center", padding: "16px 14px" }}
+      />
+      <div style={{ marginTop: 24 }}>
+        <BigButton disabled={!valid} onClick={onNext}>
+          Continuer
+        </BigButton>
       </div>
     </div>
   );
@@ -378,6 +406,7 @@ function Stopwatch({ onFinish, colorAccent }) {
 export default function App() {
   const [step, setStep] = useState("intro");
   const [answers, setAnswers] = useState({});
+  const [age, setAge] = useState("");
   const [tugTime, setTugTime] = useState(null);
   const [uniTime, setUniTime] = useState(null);
   const [lead, setLead] = useState({ nom: "", telephone: "", email: "", commune: "" });
@@ -399,6 +428,7 @@ export default function App() {
 
   const score = (() => {
     let s = 0;
+    if (age !== "" && Number(age) >= 80) s += 1;
     if (answers.chute) s += 3;
     if (answers.medicaments) s += 1;
     if (answers.vision) s += 1;
@@ -496,6 +526,7 @@ export default function App() {
     const typeLabel = { domicile: "Domicile", visio: "Visio", orientation: "Orientation (hors zone, risque élevé)" }[recommendation?.type] || "Non défini";
     return [
       `Nom : ${lead.nom}`,
+      `Âge : ${age || "non renseigné"}`,
       `Téléphone : ${lead.telephone}`,
       `Email : ${lead.email || "non renseigné"}`,
       `Commune : ${lead.commune || "non renseignée"}`,
@@ -526,6 +557,7 @@ export default function App() {
 
     const entry = {
       ...lead,
+      age,
       consent: true,
       consentDate: new Date().toISOString(),
       score,
@@ -606,6 +638,10 @@ export default function App() {
                   Confidentialité des données
                 </button>
               </div>
+            )}
+
+            {step === "age" && (
+              <AgeQuestion value={age} onChange={setAge} onNext={goNext} />
             )}
 
             {questionIndex >= 0 && questions[questionIndex].type === "yesno" && (
@@ -875,4 +911,5 @@ const inputStyle = {
   fontFamily: "inherit",
   outline: "none",
 };
+
 
